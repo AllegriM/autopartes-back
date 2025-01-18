@@ -1,6 +1,6 @@
 import { getConnection, queries } from "../database/index.js";
 
-export const getSubcategories = async (req, res) => {
+export const getSubcategories = async (req, res, next) => {
   try {
     const pool = await getConnection();
     const [result] = await pool.query(queries.getAllSubcategories);
@@ -11,7 +11,7 @@ export const getSubcategories = async (req, res) => {
   }
 };
 
-export const getSubcategoryById = async (req, res) => {
+export const getSubcategoryById = async (req, res, next) => {
   try {
     const { id } = req.params;
     const pool = await getConnection();
@@ -25,7 +25,7 @@ export const getSubcategoryById = async (req, res) => {
   }
 };
 
-export const createSubcategory = async (req, res) => {
+export const createSubcategory = async (req, res, next) => {
   try {
     const { subcategory } = req.body;
     const pool = await getConnection();
@@ -39,7 +39,7 @@ export const createSubcategory = async (req, res) => {
   }
 };
 
-export const updateSubcategory = async (req, res) => {
+export const updateSubcategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const pool = await getConnection();
@@ -62,7 +62,7 @@ export const updateSubcategory = async (req, res) => {
   }
 };
 
-export const deleteSubcategory = async (req, res) => {
+export const deleteSubcategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const connection = await getConnection();
@@ -78,7 +78,7 @@ export const deleteSubcategory = async (req, res) => {
   }
 };
 
-export const toggleSubcategoryStatus = async (req, res) => {
+export const toggleSubcategoryStatus = async (req, res, next) => {
   const { id } = req.params;
   let { estado } = req.body;
 

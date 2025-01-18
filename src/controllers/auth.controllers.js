@@ -5,7 +5,7 @@ import crypto from "crypto";
 import { getConnection, queries } from "../database/index.js";
 import { transporter } from "../utils/emailConfig.js";
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
   const {
     email,
     contraseña,
@@ -69,7 +69,7 @@ export const register = async (req, res) => {
   }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
   const { emailOrCuit, contraseña } = req.body;
 
   // Validación de errores
@@ -125,7 +125,7 @@ export const login = async (req, res) => {
   }
 };
 
-export const editProfile = async (req, res) => {
+export const editProfile = async (req, res, next) => {
   const { id, nombre, email, telefono, direccion, localidad, provincia } =
     req.body;
   try {
@@ -159,7 +159,7 @@ export const editProfile = async (req, res) => {
   }
 };
 
-export const newPassword = async (req, res) => {
+export const newPassword = async (req, res, next) => {
   const { id, antiguaContraseña, nuevaContraseña } = req.body;
 
   try {
@@ -195,7 +195,7 @@ export const newPassword = async (req, res) => {
   }
 };
 
-export const forgotPassword = async (req, res) => {
+export const forgotPassword = async (req, res, next) => {
   const { email } = req.body;
   try {
     const pool = await getConnection();
@@ -242,7 +242,7 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-export const resetPassword = async (req, res) => {
+export const resetPassword = async (req, res, next) => {
   const { token } = req.params;
   const { newPassword } = req.body;
 

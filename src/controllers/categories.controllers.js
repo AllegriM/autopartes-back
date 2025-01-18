@@ -1,6 +1,6 @@
 import { getConnection, queries } from "../database/index.js";
 
-export const getCategories = async (req, res) => {
+export const getCategories = async (req, res, next) => {
   const { estado } = req.query;
   try {
     const pool = await getConnection();
@@ -12,7 +12,7 @@ export const getCategories = async (req, res) => {
   }
 };
 
-export const getCategoriesAndSubcategories = async (req, res) => {
+export const getCategoriesAndSubcategories = async (req, res, next) => {
   const { isAdmin } = req.query;
   const query =
     isAdmin === "true"
@@ -38,7 +38,7 @@ export const getCategoriesAndSubcategories = async (req, res) => {
   }
 };
 
-export const getCategoryById = async (req, res) => {
+export const getCategoryById = async (req, res, next) => {
   const { estado } = req.query;
   try {
     const { id } = req.params;
@@ -54,7 +54,7 @@ export const getCategoryById = async (req, res) => {
   }
 };
 
-export const createCategory = async (req, res) => {
+export const createCategory = async (req, res, next) => {
   try {
     const { nombre } = req.body;
     const pool = await getConnection();
@@ -66,7 +66,7 @@ export const createCategory = async (req, res) => {
   }
 };
 
-export const updateCategory = async (req, res) => {
+export const updateCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { nombre } = req.body;
@@ -87,7 +87,7 @@ export const updateCategory = async (req, res) => {
   }
 };
 
-export const deleteCategory = async (req, res) => {
+export const deleteCategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const pool = await getConnection();
@@ -101,7 +101,7 @@ export const deleteCategory = async (req, res) => {
   }
 };
 
-export const toggleCategoryStatus = async (req, res) => {
+export const toggleCategoryStatus = async (req, res, next) => {
   const { id } = req.params;
   let { estado } = req.body;
 

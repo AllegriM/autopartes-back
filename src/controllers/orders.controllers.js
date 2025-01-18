@@ -2,7 +2,7 @@ import { getConnection } from "../database/connection.js";
 import { queries } from "../database/queries.js";
 import { sendEmailNotification } from "../utils/emailConfig.js";
 
-export const getOrders = async (req, res) => {
+export const getOrders = async (req, res, next) => {
   try {
     const pool = await getConnection();
     const [result] = await pool.query(queries.getAllOrders);
@@ -13,7 +13,7 @@ export const getOrders = async (req, res) => {
   }
 };
 
-export const getOrdersByUserId = async (req, res) => {
+export const getOrdersByUserId = async (req, res, next) => {
   try {
     const { id } = req.params;
     const pool = await getConnection();
@@ -31,7 +31,7 @@ export const getOrdersByUserId = async (req, res) => {
   }
 };
 
-export const createOrders = async (req, res) => {
+export const createOrders = async (req, res, next) => {
   const { precio_total, id_usuario, productos, usuario } = req.body.pedido;
   const pool = await getConnection();
   const connection = await pool.getConnection();
@@ -67,14 +67,13 @@ export const createOrders = async (req, res) => {
   } catch (error) {
     // Revertir la transacción en caso de error
     await connection.rollback();
-    console.error(error);
-    res.status(500).json({ message: "Error al crear el pedido", error });
+    next(error);
   } finally {
     connection.release();
   }
 };
 
-export const updateOrderStatus = async (req, res) => {
+export const updateOrderStatus = async (req, res, next) => {
   const { id } = req.params;
   const { estado } = req.body;
 

@@ -1,4 +1,4 @@
-export const getUserById = async (req, res) => {
+export const getUserById = async (req, res, next) => {
   const { id } = req.params;
 
   try {

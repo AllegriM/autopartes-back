@@ -4,7 +4,7 @@ import {
   uploadImagesToCloudinary,
 } from "../utils/cloudinary.js";
 
-export const getAdminProducts = async (req, res) => {
+export const getAdminProducts = async (req, res, next) => {
   try {
     const pool = await getConnection();
 
@@ -17,7 +17,7 @@ export const getAdminProducts = async (req, res) => {
   }
 };
 
-// export const getProducts = async (req, res) => {
+// export const getProducts = async (req, res, next) => {
 //   try {
 //     const pool = await getConnection();
 //     let [result] = [];
@@ -48,7 +48,7 @@ export const getAdminProducts = async (req, res) => {
 //   }
 // };
 
-export const getProducts = async (req, res) => {
+export const getProducts = async (req, res, next) => {
   try {
     const pool = await getConnection();
     let query = queries.getAllProductsWithImages;
@@ -99,7 +99,7 @@ export const getProducts = async (req, res) => {
   }
 };
 
-export const getProductById = async (req, res) => {
+export const getProductById = async (req, res, next) => {
   try {
     const pool = await getConnection();
     const [result] = await pool.query(queries.getProductById, [req.params.id]);
@@ -114,7 +114,7 @@ export const getProductById = async (req, res) => {
   }
 };
 
-export const getProductsByCategory = async (req, res) => {
+export const getProductsByCategory = async (req, res, next) => {
   const api = req.query.sub
     ? queries.getProductsBySubcategory
     : queries.getProductsByCategory;
@@ -135,7 +135,7 @@ export const getProductsByCategory = async (req, res) => {
   }
 };
 
-export const getProductsBySearch = async (req, res) => {
+export const getProductsBySearch = async (req, res, next) => {
   try {
     const pool = await getConnection();
     const [result] = await pool.query(queries.getProductsBySearch, [
@@ -152,7 +152,7 @@ export const getProductsBySearch = async (req, res) => {
   }
 };
 
-export const createProduct = async (req, res) => {
+export const createProduct = async (req, res, next) => {
   // const errors = validationResult(req);
 
   // if (!errors.isEmpty()) {
@@ -237,7 +237,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-export const updateProduct = async (req, res) => {
+export const updateProduct = async (req, res, next) => {
   const { id } = req.params;
 
   const {
@@ -357,7 +357,7 @@ export const updateProduct = async (req, res) => {
   }
 };
 
-export const deleteProduct = async (req, res) => {
+export const deleteProduct = async (req, res, next) => {
   const { id } = req.params;
 
   try {
@@ -374,7 +374,7 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
-export const modifyStatus = async (req, res) => {
+export const modifyStatus = async (req, res, next) => {
   const { id } = req.params;
   const { estado } = req.body;
 
