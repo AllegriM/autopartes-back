@@ -10,8 +10,30 @@ export const getAdminProducts = async (req, res, next) => {
 
     const [result] = await pool.query(queries.getAllProductsAdmin);
 
-    // Hacer una respuesta que si el length es 0, devuelva un array vacio para que no de error en el front
-    res.status(200).json(result);
+    const formattedResult = result.map((row) => {
+      // Procesar el campo 'imagenes'
+      const imagenes =
+        typeof row.imagenes === "string"
+          ? JSON.parse(row.imagenes)
+          : row.imagenes;
+
+      const formattedImages = Array.isArray(imagenes)
+        ? imagenes
+            .map((image) => ({
+              id: image.id || null,
+              url: image.url || null,
+              alt: image.alt || "No tiene descripcion",
+            }))
+            .filter((image) => image.id && image.url)
+        : [];
+
+      return {
+        ...row,
+        imagenes: formattedImages,
+      };
+    });
+
+    res.status(200).json(formattedResult);
   } catch (error) {
     next(error);
   }
