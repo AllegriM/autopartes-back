@@ -112,9 +112,9 @@ LEFT JOIN IMAGENES I ON P.id = I.id_producto
   getProductsBySearch:
     "SELECT * FROM PRODUCTOS WHERE (nombre LIKE CONCAT('%', ?, '%') OR descripcion LIKE CONCAT('%', ?, '%')) AND estado = 'A';",
   createProduct: `
-    INSERT INTO productos (nombre, descripcion, precio, id_categoria, marca, modelo, stock, codigo, codigo_barra) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    INSERT INTO PRODUCTOS (nombre, descripcion, precio, id_categoria, marca, modelo, stock, codigo, codigo_barra) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   updateProduct: `
-    UPDATE productos
+    UPDATE PRODUCTOS
     SET nombre = ?, descripcion = ?, precio = ?, id_categoria = ?, id_subcategoria = ?, codigo = ?, codigo_barra = ?, marca = ?, modelo = ?, stock = ?
     WHERE id = ?
     `,
