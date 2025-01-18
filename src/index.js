@@ -7,6 +7,8 @@ import authRoutes from "./routes/auth.routes.js";
 
 const PORT = process.env.PORT || 3000;
 
+console.log(PORT);
+
 app.use("/api", productsRoutes);
 app.use("/api", categoriesRoutes);
 app.use("/api", subcategoriesRoutes);
