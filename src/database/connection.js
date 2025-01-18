@@ -2,11 +2,7 @@ import mysql from "mysql2/promise";
 import CONFIG from "../config.js";
 
 const connectionSettings = {
-  host: CONFIG.HOST,
-  user: CONFIG.USER,
-  password: CONFIG.PASSWORD,
-  database: CONFIG.DATABASE,
-  port: CONFIG.PORT,
+  uri: CONFIG.DATABASE_URL || process.env.DATABASE_URL,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,

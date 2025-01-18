@@ -19,6 +19,7 @@ export default {
   HOST: process.env.HOST,
   PORT: process.env.PORT,
   USER: process.env.USER,
+  DATABASE_URL: process.env.DATABASE_URL,
   PASSWORD: process.env.PASSWORD,
   EMAIL_ACCOUNT: process.env.EMAIL_ACCOUNT,
   EMAIL_PASSWORD: process.env.EMAIL_PASSWORD,
