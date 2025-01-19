@@ -43,7 +43,7 @@ export const updateSubcategory = async (req, res, next) => {
   try {
     const { id } = req.params;
     const pool = await getConnection();
-    const [result] = await connection.query(queries.updateSubcategory, [
+    const [result] = await pool.query(queries.updateSubcategory, [
       req.body.nombre,
       req.body.id_categoria,
       id,
