@@ -40,12 +40,13 @@ export const createSubcategory = async (req, res, next) => {
 };
 
 export const updateSubcategory = async (req, res, next) => {
+  const { nombre, id_categoria } = req.body;
   try {
     const { id } = req.params;
     const pool = await getConnection();
     const [result] = await pool.query(queries.updateSubcategory, [
-      req.body.nombre,
-      req.body.id_categoria,
+      nombre,
+      id_categoria,
       id,
     ]);
 

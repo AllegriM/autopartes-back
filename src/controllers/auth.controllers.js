@@ -5,6 +5,8 @@ import crypto from "crypto";
 import { getConnection, queries } from "../database/index.js";
 import { transporter } from "../utils/emailConfig.js";
 
+console.log(process.env.JWT_SECRET);
+
 export const register = async (req, res, next) => {
   const {
     email,
