@@ -72,10 +72,7 @@ export const updateCategory = async (req, res, next) => {
     const { nombre } = req.body;
 
     const pool = await getConnection();
-    const [result] = await pool.query(
-      "UPDATE categories SET nombre = ? WHERE id = ?",
-      [nombre, id]
-    );
+    const [result] = await pool.query(queries.updateCategory, [nombre, id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Categoría no encontrada" });
     }
