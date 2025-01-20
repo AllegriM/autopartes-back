@@ -45,6 +45,7 @@ export const createOrders = async (req, res, next) => {
   try {
     // Comenzar la transacción
     connection = await getConnection();
+
     await connection.beginTransaction();
 
     // 1. Insertar el pedido en la tabla PEDIDOS
@@ -72,7 +73,7 @@ export const createOrders = async (req, res, next) => {
 
     res.status(201).json({ message: "Pedido creado exitosamente", pedidoId });
   } catch (error) {
-    await connection.rollback();
+    if (connection) await connection.rollback();
     next(error);
   } finally {
     if (connection) connection.releaseConnection();
