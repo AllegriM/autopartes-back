@@ -10,7 +10,7 @@ export const getCategories = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -40,7 +40,7 @@ export const getCategoriesAndSubcategories = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -59,7 +59,7 @@ export const getCategoryById = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -74,7 +74,7 @@ export const createCategory = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -98,7 +98,7 @@ export const updateCategory = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -115,7 +115,7 @@ export const deleteCategory = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -142,6 +142,6 @@ export const toggleCategoryStatus = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };

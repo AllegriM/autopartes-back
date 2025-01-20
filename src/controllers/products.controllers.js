@@ -38,7 +38,7 @@ export const getAdminProducts = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -92,7 +92,7 @@ export const getProducts = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -112,7 +112,7 @@ export const getProductById = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -136,7 +136,7 @@ export const getProductsByCategory = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -156,7 +156,7 @@ export const getProductsBySearch = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -237,7 +237,7 @@ export const createProduct = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -361,7 +361,7 @@ export const updateProduct = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -381,7 +381,7 @@ export const deleteProduct = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -402,6 +402,6 @@ export const modifyStatus = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };

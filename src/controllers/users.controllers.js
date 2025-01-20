@@ -15,6 +15,6 @@ export const getUserById = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };

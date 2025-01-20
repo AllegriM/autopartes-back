@@ -13,7 +13,7 @@ export const getOrders = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -34,7 +34,7 @@ export const getOrdersByUserId = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -75,7 +75,7 @@ export const createOrders = async (req, res, next) => {
     await connection.rollback();
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -101,6 +101,6 @@ export const updateOrderStatus = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };

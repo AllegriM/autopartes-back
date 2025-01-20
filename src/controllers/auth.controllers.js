@@ -67,7 +67,7 @@ export const register = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -125,7 +125,7 @@ export const login = async (req, res, next) => {
   } catch (error) {
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -162,7 +162,7 @@ export const editProfile = async (req, res, next) => {
     console.log(error);
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -201,7 +201,7 @@ export const newPassword = async (req, res, next) => {
     console.log(error);
     next(error);
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -252,7 +252,7 @@ export const forgotPassword = async (req, res, next) => {
     console.error(error);
     res.status(500).json({ message: "Error interno del servidor" });
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
 
@@ -295,6 +295,6 @@ export const resetPassword = async (req, res, next) => {
     console.error("Error interno:", error);
     res.status(500).json({ message: "Error interno del servidor" });
   } finally {
-    if (connection) connection.release();
+    if (connection) connection.releaseConnection();
   }
 };
