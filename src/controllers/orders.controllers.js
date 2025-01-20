@@ -1,6 +1,8 @@
 import pool, { getConnection } from "../database/connection.js";
 import { queries } from "../database/queries.js";
 import { sendEmailNotification } from "../utils/emailConfig.js";
+import { generateOrderPDF } from "../utils/generateOrder.js";
+import fs from "fs";
 
 export const getOrders = async (req, res, next) => {
   let connection;
@@ -93,6 +95,31 @@ export const updateOrderStatus = async (req, res, next) => {
     res
       .status(200)
       .json({ message: "Estado del pedido actualizado correctamente" });
+  } catch (error) {
+    next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
+  }
+};
+
+export const downloadOrder = async (req, res, next) => {
+  const { id } = req.params;
+  let connection;
+  try {
+    connection = await getConnection();
+
+    const [result] = await connection.query(queries.getOrderById, [id]);
+
+    if (result.length === 0) {
+      return res.status(404).json({ message: "Pedido no encontrado" });
+    }
+
+    const data = result[0];
+
+    // Genera el PDF y pasa directamente el flujo a la respuesta
+    generateOrderPDF(data, res);
+
+    // Los eventos de finalización y error son manejados dentro de generateOrderPDF
   } catch (error) {
     next(error);
   } finally {

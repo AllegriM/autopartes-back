@@ -173,23 +173,89 @@ LEFT JOIN IMAGENES I ON P.id = I.id_producto
 
   // Orders
   getAllOrders: "SELECT * FROM VistaPedidosAdmin",
-  getOrdersByUser:
-    "SELECT " +
-    "P.id AS id, " +
-    "P.fecha_creacion AS fecha, " +
-    "P.precio_total AS total, " +
-    "PP.id_producto AS producto_id, " +
-    "PR.nombre AS producto_nombre, " +
-    "PR.descripcion AS producto_descripcion, " +
-    "PP.cantidad AS cantidad, " +
-    "PP.precio AS precio, " +
-    "(PP.cantidad * PP.precio) AS subtotal " +
-    "FROM PEDIDOS P " +
-    "JOIN PRODUCTOS_PEDIDOS PP ON P.id = PP.id_pedido " +
-    "JOIN PRODUCTOS PR ON PP.id_producto = PR.id " +
-    "WHERE P.id_usuario = ? " +
-    "ORDER BY P.fecha_creacion DESC;",
+  getOrdersByUser: `SELECT 
+    P.id AS id_pedido,
+    P.fecha_creacion AS fecha_pedido,
+    P.precio_total AS total,
+    JSON_OBJECT(
+        'id', U.id,
+        'nombre', U.nombre,
+        'apellido', U.apellido,
+        'email', U.email,
+        'direccion', U.direccion,
+        'telefono', U.telefono,
+        'provincia', U.provincia,
+        'localidad', U.localidad,
+        'cuit', U.cuit
+    ) AS usuario,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'producto_id', PP.id_producto,
+            'nombre', PR.nombre,
+            'descripcion', PR.descripcion,
+            'cantidad', PP.cantidad,
+            'precio', PP.precio,
+            'subtotal', PP.cantidad * PP.precio
+        )
+    ) AS productos
+    FROM 
+        PEDIDOS P
+    JOIN 
+        USUARIOS U ON P.id_usuario = U.id
+    JOIN 
+        PRODUCTOS_PEDIDOS PP ON P.id = PP.id_pedido
+    JOIN 
+        PRODUCTOS PR ON PP.id_producto = PR.id
+    WHERE 
+        P.id_usuario = ?
+    GROUP BY 
+        P.id, P.fecha_creacion, P.precio_total, U.id, U.nombre, U.apellido, U.email, 
+        U.direccion, U.telefono, U.provincia, U.localidad
+    ORDER BY 
+        P.fecha_creacion DESC;`,
   updateOrderStatus: "UPDATE PEDIDOS SET estado = ? WHERE id = ?",
+  getOrderById: `
+    SELECT 
+    P.id AS id_pedido,
+    P.fecha_creacion AS fecha_pedido,
+    P.precio_total AS total,
+    JSON_OBJECT(
+        'id', U.id,
+        'nombre', U.nombre,
+        'apellido', U.apellido,
+        'email', U.email,
+        'direccion', U.direccion,
+        'telefono', U.telefono,
+        'provincia', U.provincia,
+        'localidad', U.localidad,
+        'cuit', U.cuit
+    ) AS usuario,
+    JSON_ARRAYAGG(
+        JSON_OBJECT(
+            'producto_id', PP.id_producto,
+            'nombre', PR.nombre,
+            'descripcion', PR.descripcion,
+            'cantidad', PP.cantidad,
+            'precio', PP.precio,
+            'subtotal', PP.cantidad * PP.precio
+        )
+    ) AS productos
+    FROM 
+        PEDIDOS P
+    JOIN 
+        USUARIOS U ON P.id_usuario = U.id
+    JOIN 
+        PRODUCTOS_PEDIDOS PP ON P.id = PP.id_pedido
+    JOIN 
+        PRODUCTOS PR ON PP.id_producto = PR.id
+    WHERE 
+      P.id = ?
+    GROUP BY 
+        P.id, P.fecha_creacion, P.precio_total, U.id, U.nombre, U.apellido, U.email, 
+        U.direccion, U.telefono, U.provincia, U.localidad
+    ORDER BY 
+        P.fecha_creacion DESC;
+  `,
   // Images
   createImage: "INSERT INTO IMAGENES (id_producto, url, alt) VALUES (?, ?, ?)",
   getImageById: "SELECT * FROM IMAGENES WHERE id = ?",

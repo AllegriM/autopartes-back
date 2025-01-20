@@ -25,7 +25,6 @@ export const getCategoriesAndSubcategories = async (req, res, next) => {
     connection = await getConnection();
     const [rows] = await connection.query(query);
     const categorias = rows.map((categoria) => {
-      let connection;
       // Solo parsear si subcategorias es una cadena JSON
       if (typeof categoria.subcategorias === "string") {
         try {
