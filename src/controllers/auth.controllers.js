@@ -5,8 +5,6 @@ import crypto from "crypto";
 import { getConnection, queries } from "../database/index.js";
 import { transporter } from "../utils/emailConfig.js";
 
-console.log(process.env.JWT_SECRET);
-
 export const register = async (req, res, next) => {
   const {
     email,
@@ -25,11 +23,11 @@ export const register = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [userExist] = await pool.query(
+    const [userExist] = await connection.query(
       "SELECT * FROM USUARIOS WHERE email = ? OR cuit = ?",
       [email, cuit]
     );
@@ -68,6 +66,8 @@ export const register = async (req, res, next) => {
     res.status(201).json({ nombre, email, token });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -79,12 +79,12 @@ export const login = async (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
-
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
     // Buscar al usuario por su email o CUIT
-    const [result] = await pool.query(
+    const [result] = await connection.query(
       "SELECT * FROM USUARIOS WHERE email = ? OR cuit = ?",
       [emailOrCuit, emailOrCuit]
     );
@@ -124,16 +124,19 @@ export const login = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const editProfile = async (req, res, next) => {
   const { id, nombre, email, telefono, direccion, localidad, provincia } =
     req.body;
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    await pool.query(queries.editUser, [
+    await connection.query(queries.editUser, [
       nombre,
       email,
       telefono,
@@ -143,7 +146,7 @@ export const editProfile = async (req, res, next) => {
       id,
     ]);
 
-    const [result] = await pool.query(
+    const [result] = await connection.query(
       "SELECT id, nombre, email, cuit, telefono, direccion, localidad, provincia, rol FROM USUARIOS WHERE id = ?",
       [id]
     );
@@ -158,18 +161,21 @@ export const editProfile = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const newPassword = async (req, res, next) => {
   const { id, antiguaContraseña, nuevaContraseña } = req.body;
-
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [user] = await pool.query("SELECT * FROM USUARIOS WHERE id = ?", [
-      id,
-    ]);
+    const [user] = await connection.query(
+      "SELECT * FROM USUARIOS WHERE id = ?",
+      [id]
+    );
 
     if (user.length === 0) {
       return res.status(400).json({ message: "Usuario inexistente" });
@@ -185,7 +191,7 @@ export const newPassword = async (req, res, next) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(nuevaContraseña, salt);
 
-    await pool.query("UPDATE USUARIOS SET contraseña = ? WHERE id = ?", [
+    await connection.query("UPDATE USUARIOS SET contraseña = ? WHERE id = ?", [
       hashedPassword,
       id,
     ]);
@@ -194,16 +200,20 @@ export const newPassword = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const forgotPassword = async (req, res, next) => {
+  let connection;
   const { email } = req.body;
   try {
-    const pool = await getConnection();
-    const [user] = await pool.query("SELECT * FROM USUARIOS WHERE email = ?", [
-      email,
-    ]);
+    connection = await getConnection();
+    const [user] = await connection.query(
+      "SELECT * FROM USUARIOS WHERE email = ?",
+      [email]
+    );
 
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -217,7 +227,7 @@ export const forgotPassword = async (req, res, next) => {
       .digest("hex");
 
     // Guardar el token en la base de datos con expiración
-    await pool.query(
+    await connection.query(
       "UPDATE USUARIOS SET resetToken = ?, resetTokenExpires = ? WHERE email = ?",
       [hashedToken, new Date(Date.now() + 15 * 60 * 1000), email]
     );
@@ -241,19 +251,21 @@ export const forgotPassword = async (req, res, next) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Error interno del servidor" });
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const resetPassword = async (req, res, next) => {
   const { token } = req.params;
   const { newPassword } = req.body;
-
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
-    const [rows] = await pool.query(
+    const [rows] = await connection.query(
       "SELECT * FROM USUARIOS WHERE resetToken = ? AND resetTokenExpires > ?",
       [hashedToken, new Date()]
     );
@@ -267,7 +279,7 @@ export const resetPassword = async (req, res, next) => {
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-    const [result] = await pool.query(
+    const [result] = await connection.query(
       "UPDATE USUARIOS SET contraseña = ?, resetToken = NULL, resetTokenExpires = NULL WHERE email = ?",
       [hashedPassword, user.email]
     );
@@ -282,5 +294,7 @@ export const resetPassword = async (req, res, next) => {
   } catch (error) {
     console.error("Error interno:", error);
     res.status(500).json({ message: "Error interno del servidor" });
+  } finally {
+    if (connection) connection.release();
   }
 };

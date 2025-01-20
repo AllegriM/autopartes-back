@@ -1,50 +1,60 @@
 import { getConnection, queries } from "../database/index.js";
 
 export const getSubcategories = async (req, res, next) => {
+  let connection;
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.getAllSubcategories);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.getAllSubcategories);
 
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
   }
 };
 
 export const getSubcategoryById = async (req, res, next) => {
+  let connection;
   try {
     const { id } = req.params;
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.getSubcategoryById, [id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.getSubcategoryById, [id]);
     if (!result.length) {
       return res.status(404).json({ message: "Subcategoría no encontrada" });
     }
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
   }
 };
 
 export const createSubcategory = async (req, res, next) => {
+  let connection;
   try {
     const { subcategory } = req.body;
-    const pool = await getConnection();
-    await pool.query(queries.createSubcategory, [
+    connection = await getConnection();
+    await connection.query(queries.createSubcategory, [
       subcategory.nombre,
       subcategory.id_categoria,
     ]);
     res.status(201).json({ message: "Subcategoría creada" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
   }
 };
 
 export const updateSubcategory = async (req, res, next) => {
+  let connection;
   const { nombre, id_categoria } = req.body;
   try {
     const { id } = req.params;
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.updateSubcategory, [
+    connection = await getConnection();
+    const [result] = await connection.query(queries.updateSubcategory, [
       nombre,
       id_categoria,
       id,
@@ -60,13 +70,16 @@ export const updateSubcategory = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
   }
 };
 
 export const deleteSubcategory = async (req, res, next) => {
+  let connection;
   try {
     const { id } = req.params;
-    const connection = await getConnection();
+    connection = await getConnection();
     const [result] = await connection.query(queries.deleteSubcategory, [id]);
 
     if (result.affectedRows === 0) {
@@ -76,10 +89,13 @@ export const deleteSubcategory = async (req, res, next) => {
     res.status(200).json({ message: "Subcategoría eliminada" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
   }
 };
 
 export const toggleSubcategoryStatus = async (req, res, next) => {
+  let connection;
   const { id } = req.params;
   let { estado } = req.body;
 
@@ -94,16 +110,14 @@ export const toggleSubcategoryStatus = async (req, res, next) => {
 
   try {
     // Ejecución de la consulta
-    const pool = await getConnection();
-    await pool.query(queries.toggleSubcategoryStatus, [nuevoEstado, id]);
+    connection = await getConnection();
+    await connection.query(queries.toggleSubcategoryStatus, [nuevoEstado, id]);
     res.status(200).json({
       message: `Categoría ${estado ? "activada" : "desactivada"} exitosamente`,
     });
   } catch (error) {
-    console.error("Error en la consulta SQL:", error.message);
-    res.status(500).json({
-      message: "Error al cambiar el estado de la categoría",
-      error,
-    });
+    next(error);
+  } finally {
+    if (connection) connection.releaseConnection();
   }
 };

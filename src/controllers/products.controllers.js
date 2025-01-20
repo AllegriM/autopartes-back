@@ -5,10 +5,11 @@ import {
 } from "../utils/cloudinary.js";
 
 export const getAdminProducts = async (req, res, next) => {
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [result] = await pool.query(queries.getAllProductsAdmin);
+    const [result] = await connection.query(queries.getAllProductsAdmin);
 
     const formattedResult = result.map((row) => {
       // Procesar el campo 'imagenes'
@@ -36,43 +37,15 @@ export const getAdminProducts = async (req, res, next) => {
     res.status(200).json(formattedResult);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
-// export const getProducts = async (req, res, next) => {
-//   try {
-//     const pool = await getConnection();
-//     let [result] = [];
-
-//     if (req.query.categoria) {
-//       const query = req.query.sub
-//         ? queries.getProductsBySubcategory
-//         : queries.getProductsByCategory;
-
-//       [result] = await pool.query(query, [
-//         req.query.sub || req.query.categoria,
-//       ]);
-//     } else if (req.query.search) {
-//       [result] = await pool.query(queries.getProductsBySearch, [
-//         req.query.search,
-//       ]);
-//     } else {
-//       [result] = await pool.query(queries.getAllProducts);
-//     }
-
-//     if (!result.length) {
-//       return res.status(404).json({ message: "No se encontraron productos" });
-//     }
-
-//     res.status(200).json(result);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 export const getProducts = async (req, res, next) => {
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
     let query = queries.getAllProductsWithImages;
     const params = [];
 
@@ -88,7 +61,7 @@ export const getProducts = async (req, res, next) => {
     }
 
     // Ejecuta la consulta
-    const [result] = await pool.query(query, params);
+    const [result] = await connection.query(query, params);
 
     // Formatear los datos
     const formattedResult = result.map((row) => {
@@ -118,13 +91,18 @@ export const getProducts = async (req, res, next) => {
     res.status(200).json(formattedResult);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const getProductById = async (req, res, next) => {
+  let connection;
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.getProductById, [req.params.id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.getProductById, [
+      req.params.id,
+    ]);
 
     if (!result.length) {
       return res.status(404).json({ message: "No se encontró el producto" });
@@ -133,17 +111,20 @@ export const getProductById = async (req, res, next) => {
     res.status(200).json(result[0]);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const getProductsByCategory = async (req, res, next) => {
+  let connection;
   const api = req.query.sub
     ? queries.getProductsBySubcategory
     : queries.getProductsByCategory;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [result] = await pool.query(api, [
+    const [result] = await connection.query(api, [
       req.query.sub || req.query.categoria,
     ]);
 
@@ -154,13 +135,16 @@ export const getProductsByCategory = async (req, res, next) => {
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const getProductsBySearch = async (req, res, next) => {
+  let connection;
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.getProductsBySearch, [
+    connection = await getConnection();
+    const [result] = await connection.query(queries.getProductsBySearch, [
       req.query.search,
       req.query.search,
     ]);
@@ -171,10 +155,13 @@ export const getProductsBySearch = async (req, res, next) => {
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const createProduct = async (req, res, next) => {
+  let connection;
   const {
     nombre,
     descripcion = "No tiene descripción",
@@ -188,9 +175,9 @@ export const createProduct = async (req, res, next) => {
   } = req.body;
 
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [result] = await pool.query(queries.createProduct, [
+    const [result] = await connection.query(queries.createProduct, [
       nombre,
       descripcion,
       precio,
@@ -226,8 +213,7 @@ export const createProduct = async (req, res, next) => {
         // Insertar URLs en la base de datos
         const imageInsertPromises = uploadedImages.map(
           async (uploadedImage) => {
-            console.log(uploadedImage);
-            await pool.query(queries.createImage, [
+            await connection.query(queries.createImage, [
               productId,
               uploadedImage.url,
               uploadedImage.original_filename,
@@ -250,10 +236,13 @@ export const createProduct = async (req, res, next) => {
     res.status(201).json({ message: "Producto creado con éxito", productId });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const updateProduct = async (req, res, next) => {
+  let connection;
   const { id } = req.params;
 
   const {
@@ -275,8 +264,8 @@ export const updateProduct = async (req, res, next) => {
   const subcategoryId = id_subcategoria === "null" ? null : id_subcategoria;
 
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.updateProduct, [
+    connection = await getConnection();
+    const [result] = await connection.query(queries.updateProduct, [
       nombre,
       descripcion,
       precio,
@@ -306,7 +295,7 @@ export const updateProduct = async (req, res, next) => {
 
       try {
         const imageDeletePromises = imagenesEliminadas.map(async (imageId) => {
-          const [imageResult] = await pool.query(queries.getImageById, [
+          const [imageResult] = await connection.query(queries.getImageById, [
             imageId,
           ]);
 
@@ -316,7 +305,7 @@ export const updateProduct = async (req, res, next) => {
 
           const image = imageResult[0];
 
-          await pool.query(queries.deleteImage, [imageId]);
+          await connection.query(queries.deleteImage, [imageId]);
 
           await deleteImageFromCloudinary(image.url);
 
@@ -343,8 +332,9 @@ export const updateProduct = async (req, res, next) => {
 
         const imageInsertPromises = uploadedImages.map(
           async (uploadedImage) => {
+            let connection;
             console.log(uploadedImage);
-            await pool.query(queries.createImage, [
+            await connection.query(queries.createImage, [
               id,
               uploadedImage.url,
               uploadedImage.original_filename,
@@ -370,15 +360,18 @@ export const updateProduct = async (req, res, next) => {
     res.status(200).json({ message: "Producto actualizado correctamente" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const deleteProduct = async (req, res, next) => {
+  let connection;
   const { id } = req.params;
 
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.deleteProduct, [id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.deleteProduct, [id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "No se encontró el producto" });
@@ -387,16 +380,19 @@ export const deleteProduct = async (req, res, next) => {
     res.status(200).json({ message: "Producto borrado correctamente" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const modifyStatus = async (req, res, next) => {
+  let connection;
   const { id } = req.params;
   const { estado } = req.body;
 
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.modifyStatus, [estado, id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.modifyStatus, [estado, id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "No se encontró el producto" });
@@ -405,5 +401,7 @@ export const modifyStatus = async (req, res, next) => {
     res.status(200).json({ message: "Estado actualizado correctamente" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };

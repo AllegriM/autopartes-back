@@ -1,15 +1,20 @@
+import { getConnection } from "../database";
+
 export const getUserById = async (req, res, next) => {
   const { id } = req.params;
-
+  let connection;
   try {
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [result] = await pool.query("SELECT * FROM USUARIOS WHERE id = ?", [
-      id,
-    ]);
+    const [result] = await connection.query(
+      "SELECT * FROM USUARIOS WHERE id = ?",
+      [id]
+    );
 
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };

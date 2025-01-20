@@ -3,21 +3,26 @@ import { queries } from "../database/queries.js";
 import { sendEmailNotification } from "../utils/emailConfig.js";
 
 export const getOrders = async (req, res, next) => {
+  let connection;
+
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.getAllOrders);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.getAllOrders);
 
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const getOrdersByUserId = async (req, res, next) => {
+  const { id } = req.params;
+  let connection;
   try {
-    const { id } = req.params;
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.getOrdersByUser, [id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.getOrdersByUser, [id]);
 
     if (result.length === 0) {
       return res.status(404).json({
@@ -28,16 +33,18 @@ export const getOrdersByUserId = async (req, res, next) => {
     res.status(200).json(result);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const createOrders = async (req, res, next) => {
   const { precio_total, id_usuario, productos, usuario } = req.body.pedido;
-  const pool = await getConnection();
-  const connection = await pool.getConnection();
 
+  let connection;
   try {
     // Comenzar la transacción
+    connection = await getConnection();
     await connection.beginTransaction();
 
     // 1. Insertar el pedido en la tabla PEDIDOS
@@ -65,21 +72,24 @@ export const createOrders = async (req, res, next) => {
 
     res.status(201).json({ message: "Pedido creado exitosamente", pedidoId });
   } catch (error) {
-    // Revertir la transacción en caso de error
     await connection.rollback();
     next(error);
   } finally {
-    connection.release();
+    if (connection) connection.release();
   }
 };
 
 export const updateOrderStatus = async (req, res, next) => {
+  let connection;
   const { id } = req.params;
   const { estado } = req.body;
 
   try {
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.updateOrderStatus, [estado, id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.updateOrderStatus, [
+      estado,
+      id,
+    ]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "No se encontró el pedido" });
@@ -90,5 +100,7 @@ export const updateOrderStatus = async (req, res, next) => {
       .json({ message: "Estado del pedido actualizado correctamente" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };

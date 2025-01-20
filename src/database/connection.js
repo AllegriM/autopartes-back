@@ -1,7 +1,7 @@
 import mysql from "mysql2/promise";
 import CONFIG from "../config.js";
 
-const connectionSettings = {
+const pool = mysql.createPool({
   uri: CONFIG.DATABASE_URL || process.env.DATABASE_URL,
   host: CONFIG.HOST || process.env.HOST,
   user: CONFIG.USER || process.env.USER,
@@ -10,16 +10,12 @@ const connectionSettings = {
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-};
+});
+
+export default pool;
 
 export async function getConnection() {
-  try {
-    const pool = mysql.createPool(connectionSettings);
-    return pool;
-  } catch (error) {
-    console.error("Error connecting to the database:", error.message);
-    throw new Error("Database connection failed");
-  }
+  return pool;
 }
 
 export { mysql };

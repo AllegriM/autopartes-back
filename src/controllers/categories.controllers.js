@@ -1,14 +1,16 @@
 import { getConnection, queries } from "../database/index.js";
 
 export const getCategories = async (req, res, next) => {
-  const { estado } = req.query;
+  let connection;
   try {
-    const pool = await getConnection();
-    const [rows] = await pool.query(queries.getAllCategories);
+    connection = await getConnection();
+    const [rows] = await connection.query(queries.getAllCategories);
 
     res.status(200).json(rows);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -18,10 +20,12 @@ export const getCategoriesAndSubcategories = async (req, res, next) => {
     isAdmin === "true"
       ? queries.getCategoriesAndSubcategories
       : queries.getActiveCategoriasAndSubcategories;
+  let connection;
   try {
-    const pool = await getConnection();
-    const [rows] = await pool.query(query);
+    connection = await getConnection();
+    const [rows] = await connection.query(query);
     const categorias = rows.map((categoria) => {
+      let connection;
       // Solo parsear si subcategorias es una cadena JSON
       if (typeof categoria.subcategorias === "string") {
         try {
@@ -35,44 +39,56 @@ export const getCategoriesAndSubcategories = async (req, res, next) => {
     res.status(200).json(categorias);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const getCategoryById = async (req, res, next) => {
   const { estado } = req.query;
+  let connection;
   try {
     const { id } = req.params;
-    const pool = await getConnection();
+    connection = await getConnection();
 
-    const [rows] = await pool.query(queries.getCategoryById, [id]);
+    const [rows] = await connection.query(queries.getCategoryById, [id]);
     if (rows.length === 0) {
       return res.status(404).json({ message: "Categoría no encontrada" });
     }
     res.status(200).json(rows[0]);
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const createCategory = async (req, res, next) => {
+  let connection;
   try {
     const { nombre } = req.body;
-    const pool = await getConnection();
-    await pool.query(queries.createCategory, [nombre]);
+    connection = await getConnection();
+    await connection.query(queries.createCategory, [nombre]);
 
     res.status(201).json({ message: "Categoría creada" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const updateCategory = async (req, res, next) => {
+  let connection;
   try {
     const { id } = req.params;
     const { nombre } = req.body;
 
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.updateCategory, [nombre, id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.updateCategory, [
+      nombre,
+      id,
+    ]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Categoría no encontrada" });
     }
@@ -81,20 +97,25 @@ export const updateCategory = async (req, res, next) => {
       .json({ message: "Categoría actualizada", category: req.body });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
 export const deleteCategory = async (req, res, next) => {
+  let connection;
   try {
     const { id } = req.params;
-    const pool = await getConnection();
-    const [result] = await pool.query(queries.deleteCategory, [id]);
+    connection = await getConnection();
+    const [result] = await connection.query(queries.deleteCategory, [id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Categoría no encontrada" });
     }
     res.status(200).json({ message: "Categoría eliminada" });
   } catch (error) {
     next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
 
@@ -110,19 +131,17 @@ export const toggleCategoryStatus = async (req, res, next) => {
   }
   // Asignación del nuevo estado
   const nuevoEstado = estado ? "A" : "D";
-
+  let connection;
   try {
     // Ejecución de la consulta
-    const pool = await getConnection();
-    await pool.query(queries.toggleCategoryStatus, [nuevoEstado, id]);
+    connection = await getConnection();
+    await connection.query(queries.toggleCategoryStatus, [nuevoEstado, id]);
     res.status(200).json({
       message: `Categoría ${estado ? "activada" : "desactivada"} exitosamente`,
     });
   } catch (error) {
-    console.error("Error en la consulta SQL:", error.message);
-    res.status(500).json({
-      message: "Error al cambiar el estado de la categoría",
-      error,
-    });
+    next(error);
+  } finally {
+    if (connection) connection.release();
   }
 };
