@@ -43,7 +43,7 @@ export const register = async (req, res, next) => {
     const hashedPassword = await bcrypt.hash(contraseña, salt);
 
     // Insertar nuevo usuario en la base de datos
-    await pool.query(
+    await connection.query(
       "INSERT INTO USUARIOS (email, contraseña, nombre, apellido, direccion, cuit, telefono, localidad, provincia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         email,

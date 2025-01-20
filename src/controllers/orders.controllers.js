@@ -1,4 +1,4 @@
-import { getConnection } from "../database/connection.js";
+import pool, { getConnection } from "../database/connection.js";
 import { queries } from "../database/queries.js";
 import { sendEmailNotification } from "../utils/emailConfig.js";
 
@@ -43,21 +43,17 @@ export const createOrders = async (req, res, next) => {
 
   let connection;
   try {
-    // Comenzar la transacción
-    connection = await getConnection();
+    connection = await pool.getConnection();
 
     await connection.beginTransaction();
 
-    // 1. Insertar el pedido en la tabla PEDIDOS
     const [pedidoResult] = await connection.query(
       "INSERT INTO PEDIDOS (precio_total, id_usuario) VALUES (?, ?);",
       [precio_total, id_usuario]
     );
 
-    // Obtener el ID generado automáticamente
     const pedidoId = pedidoResult.insertId;
 
-    // 2. Insertar productos en la tabla PRODUCTOS_PEDIDOS usando el pedidoId
     for (const producto of productos) {
       await connection.query(
         "INSERT INTO PRODUCTOS_PEDIDOS (id_pedido, id_producto, cantidad, precio) VALUES (?, ?, ?, ?)",
@@ -65,10 +61,8 @@ export const createOrders = async (req, res, next) => {
       );
     }
 
-    // Confirmar la transacción
     await connection.commit();
 
-    // Enviar correo de notificación
     await sendEmailNotification({ precio_total, productos, usuario });
 
     res.status(201).json({ message: "Pedido creado exitosamente", pedidoId });
@@ -76,7 +70,7 @@ export const createOrders = async (req, res, next) => {
     if (connection) await connection.rollback();
     next(error);
   } finally {
-    if (connection) connection.releaseConnection();
+    if (connection) await connection.release();
   }
 };
 
