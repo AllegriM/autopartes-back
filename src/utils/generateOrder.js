@@ -6,9 +6,12 @@ export const generateOrderPDF = (data, res) => {
     const doc = new PDFDocument();
 
     // Configura el encabezado del PDF
+    doc
+      .fontSize(20)
+      .text("JMP AUTOMOTORES", { align: "center", underline: true });
     doc.fontSize(16).text("Factura de Pedido", { align: "center" });
     doc.moveDown();
-    doc.fontSize(12).text(`ID Pedido: ${data.id_pedido}`);
+    doc.fontSize(12).text(`NRO. Pedido: ${data.id_pedido}`);
     doc.text(
       `Fecha: ${new Date(data.fecha_pedido).toLocaleDateString(
         "es-AR",
