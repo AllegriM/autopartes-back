@@ -332,7 +332,6 @@ export const updateProduct = async (req, res, next) => {
 
         const imageInsertPromises = uploadedImages.map(
           async (uploadedImage) => {
-            let connection;
             console.log(uploadedImage);
             await connection.query(queries.createImage, [
               id,
